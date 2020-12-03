@@ -9,7 +9,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 logging.basicConfig(filename='theFoxTalesBot.log', level=logging.INFO)
 
 def greet_user(update, context):
-    print('Вызван /start')
+    logging.info('Вызван /start')
     update.message.reply_text('Здравствуй, пользователь! Ты вызвал команду /start')
 
 def talk_to_me(update, context):
@@ -36,7 +36,7 @@ def print_planet_place(update, context):
 def get_wordcount(update, context):
     user_text = update.message.text
     user_text = user_text.replace("/wordcount", '')
-    print(user_text)
+    logging.info(user_text)
     if not isinstance(user_text, str):
         return update.message.reply_text('Ой, кажется ты ввёл не строку')
     
