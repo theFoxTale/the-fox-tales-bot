@@ -1,20 +1,30 @@
-import logging
-import ephem
-import settings
-
 from datetime import date
+from emoji import emojize
+import ephem
+from glob import glob
+import logging
+from random import randint, choice
+import settings
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # Логи
 logging.basicConfig(filename='theFoxTalesBot.log', level=logging.INFO)
 
+def get_smile(user_data):
+    if 'emoji' not in user_data:
+        smile = choice(settings.USER_EMOJI)
+        return emojize(smile, use_aliases=True)
+    return user_data['emoji']
+
 def greet_user(update, context):
     logging.info('Вызван /start')
-    update.message.reply_text('Здравствуй, пользователь! Ты вызвал команду /start')
+    context.user_data['emoji'] = get_smile(context.user_data)
+    update.message.reply_text(f"Здравствуй, пользователь {context.user_data['emoji']}! Ты вызвал команду /start")
 
 def talk_to_me(update, context):
+    context.user_data['emoji'] = get_smile(context.user_data)
     user_text = update.message.text 
-    update.message.reply_text(f"Ты говоришь Лисичке *{user_text}*.\nИ Лисичка отвечает тебе _{user_text}_!", parse_mode='MARKDOWN')
+    update.message.reply_text(f"Ты говоришь Лисичке *{user_text}*.\nИ Лисичка отвечает тебе _{user_text}_! {context.user_data['emoji']}", parse_mode='MARKDOWN')
 
 def print_planet_place(update, context):
     user_text = update.message.text
@@ -47,6 +57,35 @@ def get_wordcount(update, context):
     res_text = stripped_text.split()
     update.message.reply_text(f'Лисичка посчитала, в твоей строке {len(res_text)} слов!')
 
+def guess_number(update, context):
+    logging.info(context.args)
+    if not context.args:
+        update.message.reply_text('Лисичка расстроена, ты не ввёл никакого числа!')
+
+    try:
+        user_number = int(float(context.args[0]))
+        update.message.reply_text(play_game_random_numbers(user_number))
+    except (ValueError, TypeError):
+        update.message.reply_text(f'Эй, ты ввёл текст {context.args[0]}, а не число!')
+
+def play_game_random_numbers(user_number):
+    bot_number = randint(user_number-10, user_number+10)
+    if user_number > bot_number:
+        message = f"Ты загадал {user_number}, Лисичка загадала {bot_number}. Ты выиграл!"
+    elif user_number == bot_number:
+        message = f"Ты загадал {user_number}, Лисичка загадала {bot_number}. У нас ничья!"
+    else:
+        message = f"Ты загадал {user_number}, Лисичка загадала {bot_number}. Я выиграла!"
+    return message
+        
+def send_picture_with_cat(update, context):
+    cat_images_list = glob('images/cat-*.jp*g')
+    cat_filename = choice(cat_images_list)
+
+    #ID чата с конкретным пользователем
+    chat_id = update.effective_chat.id
+    context.bot.send_photo(chat_id=chat_id, photo=open(cat_filename, 'rb'))
+
 def main():
     # Создаем бота и передаем ему ключ для авторизации на серверах Telegram
     mybot = Updater(settings.API_KEY, use_context=True)
@@ -56,6 +95,8 @@ def main():
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("planet", print_planet_place))
     dp.add_handler(CommandHandler("wordcount", get_wordcount))
+    dp.add_handler(CommandHandler("guess", guess_number))
+    dp.add_handler(CommandHandler("cat", send_picture_with_cat))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     # Командуем боту начать ходить в Telegram за сообщениями
