@@ -1,6 +1,9 @@
+from clarifai.rest import ClarifaiApp
 from glob import glob
 import logging
+import os
 from random import choice
+import settings
 
 from utils import get_smile, play_game_random_numbers, create_fox_keyboard
 
@@ -67,3 +70,19 @@ def get_user_coordinates(update, context):
         f"Лисичка нашла твои координаты {context.user_data['emoji']}: долгота {coords['longitude']}, широта {coords['latitude']}!",
         reply_markup=create_fox_keyboard()
     )
+
+def check_user_photo(update, context):
+    update.message.reply_text("Лисичка получила твоё фото, обрабатываю фотографию... ")
+    os.makedirs('downloads', exist_ok=True)
+   
+    # берём фото самого большого размера
+    user_photo = context.bot.getFile(update.message.photo[-1].file_id)
+    file_full_name = os.path.join("downloads", f"{user_photo.file_id}.jpg")
+    user_photo.download(file_full_name)
+    update.message.reply_text("Сохранила фото на диск!")
+
+def is_cat(file_name):
+    app = ClarifaiApp(api_key=settings.CLARIFAI_API_KEY)
+    model = app.public_models.general_model
+    response = model.predict_by_filename(file_name, max_concepts=5)
+    return response

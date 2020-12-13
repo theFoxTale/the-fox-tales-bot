@@ -1,5 +1,12 @@
-from handlers import (greet_user, talk_to_me, get_wordcount, guess_number, send_picture_with_cat,
-                        get_user_coordinates)
+from handlers import (
+    greet_user, 
+    talk_to_me, 
+    get_wordcount, 
+    guess_number, 
+    send_picture_with_cat,
+    get_user_coordinates,
+    check_user_photo
+)
 from handlers_planet import print_planet_place
 
 import logging
@@ -21,6 +28,9 @@ def main():
     dp.add_handler(CommandHandler("wordcount", get_wordcount))
     dp.add_handler(CommandHandler("guess", guess_number))
     dp.add_handler(CommandHandler("cat", send_picture_with_cat))
+
+    # обработчик фото
+    dp.add_handler(MessageHandler(Filters.photo, check_user_photo))
 
     # обработчики текста
     # более частные всегда ставим выше, более общие - внизу
