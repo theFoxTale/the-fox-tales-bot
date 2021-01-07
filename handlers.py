@@ -7,6 +7,7 @@ import settings
 
 from utils import create_fox_keyboard, get_smile, play_game_random_numbers
 
+
 def greet_user(update, context):
     logging.info('Вызван /start')
     context.user_data['emoji'] = get_smile(context.user_data)
@@ -14,6 +15,7 @@ def greet_user(update, context):
         f"Здравствуй, пользователь {context.user_data['emoji']}! Ты вызвал команду /start",
         reply_markup=create_fox_keyboard()
     )
+
 
 def talk_to_me(update, context):
     context.user_data['emoji'] = get_smile(context.user_data)
@@ -23,13 +25,14 @@ def talk_to_me(update, context):
         reply_markup=create_fox_keyboard()
     )
 
+
 def get_wordcount(update, context):
     user_text = update.message.text
     user_text = user_text.replace("/wordcount", '')
     logging.info(user_text)
     if not isinstance(user_text, str):
         return update.message.reply_text('Ой, кажется ты ввёл не строку')
-    
+
     stripped_text = user_text.strip()
     if len(stripped_text) == 0:
         return update.message.reply_text('Похоже ты ввёл пустую строку!')
@@ -39,6 +42,7 @@ def get_wordcount(update, context):
         f'Лисичка посчитала, в твоей строке {len(res_text)} слов!',
         reply_markup=create_fox_keyboard()
     )
+
 
 def guess_number(update, context):
     logging.info(context.args)
@@ -51,17 +55,19 @@ def guess_number(update, context):
     except (ValueError, TypeError):
         update.message.reply_text(f'Эй, ты ввёл текст {context.args[0]}, а не число!')
 
+
 def send_picture_with_cat(update, context):
     cat_images_list = glob('images/cat-*.jp*g')
     cat_filename = choice(cat_images_list)
 
-    #ID чата с конкретным пользователем
+    # ID чата с конкретным пользователем
     chat_id = update.effective_chat.id
     context.bot.send_photo(
-        chat_id=chat_id, 
+        chat_id=chat_id,
         photo=open(cat_filename, 'rb'),
         reply_markup=create_fox_keyboard()
     )
+
 
 def get_user_coordinates(update, context):
     context.user_data['emoji'] = get_smile(context.user_data)
@@ -71,10 +77,11 @@ def get_user_coordinates(update, context):
         reply_markup=create_fox_keyboard()
     )
 
+
 def check_user_photo(update, context):
     update.message.reply_text("Лисичка получила твоё фото, обрабатываю фотографию... ")
     os.makedirs('downloads', exist_ok=True)
-   
+
     # берём фото самого большого размера
     user_photo = context.bot.getFile(update.message.photo[-1].file_id)
     full_file_name = os.path.join("downloads", f"{user_photo.file_id}.jpg")
@@ -88,6 +95,7 @@ def check_user_photo(update, context):
     else:
         update.message.reply_text("Лисичка не увидела на фотографии котика :(")
         os.remove(full_file_name)
+
 
 def is_cat(file_name):
     app = ClarifaiApp(api_key=settings.CLARIFAI_API_KEY)
