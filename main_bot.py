@@ -1,8 +1,8 @@
 from handlers import (
-    greet_user, 
-    talk_to_me, 
-    get_wordcount, 
-    guess_number, 
+    greet_user,
+    talk_to_me,
+    get_wordcount,
+    guess_number,
     send_picture_with_cat,
     get_user_coordinates,
     check_user_photo
@@ -15,6 +15,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # Логи
 logging.basicConfig(filename='theFoxTalesBot.log', level=logging.INFO)
+
 
 def main():
     # Создаем бота и передаем ему ключ для авторизации на серверах Telegram
@@ -45,7 +46,7 @@ def main():
     mybot.idle()
 
 
-# Исполняется только при прямом вызове файла python bot.py 
+# Исполняется только при прямом вызове файла python bot.py
 # и не вызывается при импорте, например from bot import PROXY
 if __name__ == "__main__":
     main()
